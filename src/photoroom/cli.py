@@ -7,6 +7,7 @@
     photoroom suggest                mark the suggested extras in duplicate / similar groups
     photoroom app                    review app: tick what goes
     photoroom marked [-o FILE]       the marked items' Google Photos links
+    photoroom install-desktop        add the app to the app menu
 """
 
 import argparse
@@ -62,10 +63,16 @@ def main(argv=None) -> int:
     sub.add_parser("report")
     sub.add_parser("suggest")
     sub.add_parser("app")
+    s = sub.add_parser("install-desktop")
+    s.add_argument("--uninstall", action="store_true")
     s = sub.add_parser("marked")
     s.add_argument("-o", "--output", type=Path)
     a = p.parse_args(argv)
 
+    if a.cmd == "install-desktop":
+        from .desktop import install
+        print(install(a.uninstall))
+        return 0
     if a.cmd == "app":
         from .app.backend import run_app
         return run_app()

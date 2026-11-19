@@ -145,3 +145,13 @@ def test_cli_end_to_end(env, takeout_zip, capsys):
     links = (env / "links.txt").read_text().split()
     assert "https://photos.google.com/photo/BURST_1.jpg" in links
     assert "https://photos.google.com/photo/BURST_2.jpg" not in links
+
+
+def test_install_desktop(tmp_path, monkeypatch):
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path))
+    assert main(["install-desktop"]) == 0
+    entry = (tmp_path / "applications/photoroom.desktop").read_text()
+    assert "-m photoroom app" in entry
+    assert (tmp_path / "icons/hicolor/scalable/apps/photoroom.svg").exists()
+    assert main(["install-desktop", "--uninstall"]) == 0
+    assert not (tmp_path / "applications/photoroom.desktop").exists()

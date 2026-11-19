@@ -1,6 +1,7 @@
 """Per-item analysis: size, camera, perceptual hash, sharpness, brightness,
 thumbnail; video duration + poster frame. Runs in parallel worker processes."""
 
+import multiprocessing
 import os
 import re
 import subprocess
@@ -115,7 +116,7 @@ def run(store: Store, workers: int | None = None, log=print) -> int:
             store.update_analysis(key, values)
             done += 1
     else:
-        with ProcessPoolExecutor(workers) as pool:
+        with ProcessPoolExecutor(workers, mp_context=multiprocessing.get_context("forkserver")) as pool:
             futs = [pool.submit(analyze_one, r["key"], r["path"], r["kind"]) for r in todo]
             for f in as_completed(futs):
                 key, values = f.result()
